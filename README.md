@@ -7,7 +7,7 @@ A browser-based simulator for two core operating-systems topics:
 2. **Page replacement**: see how FIFO, LRU, and Optimal choose which page to evict when memory frames are full.
 No build step, no dependencies. It is plain HTML, CSS, and JavaScript.
  
-Developed as the final term project for CS 3104N (Group 11).
+Developed as the final term project for CS 3104N.
  
 ## Team
  
