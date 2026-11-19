@@ -62,8 +62,13 @@
     return m;
   }
 
-  function renderGantt(out, procs) {
-    var g = $('gantt'), colors = colorMap(procs);
+  function renderGantt(out, procs, label) {
+    var g = $('gantt'), colors = colorMap(procs), lg = $('gantt-legend');
+    $('sched-chip').textContent = label; $('sched-chip').hidden = false;
+    lg.innerHTML = ''; lg.hidden = false;
+    procs.forEach(function (p) {
+      var li = document.createElement('li'); li.className = 'sw c' + colors[p.pid]; li.textContent = p.pid; lg.appendChild(li);
+    });
     var total = out.gantt[out.gantt.length - 1].end;
     g.className = 'gantt'; g.innerHTML = '';
     void g.offsetWidth; g.className = 'gantt play'; // restart the reveal animation
@@ -97,8 +102,8 @@
     a.innerHTML = '';
     [['Average turnaround', out.avgTat], ['Average waiting', out.avgWt]].forEach(function (x) {
       var d = document.createElement('div'), b = document.createElement('b'), l = document.createElement('span');
-      b.textContent = x[1].toFixed(2); l.textContent = x[0];
-      d.appendChild(b); d.appendChild(l); a.appendChild(d);
+      d.className = 'stat'; l.className = 'lab'; b.textContent = x[1].toFixed(2); l.textContent = x[0];
+      d.appendChild(l); d.appendChild(b); a.appendChild(d);
     });
   }
 
@@ -106,7 +111,7 @@
     $('gantt').className = 'gantt empty';
     $('gantt').textContent = 'Run a simulation to see the schedule.';
     document.querySelector('#metrics tbody').innerHTML = '<tr><td colspan="6" class="empty">No results yet.</td></tr>';
-    $('averages').hidden = true;
+    $('averages').hidden = true; $('sched-chip').hidden = true; $('gantt-legend').hidden = true;
   }
 
   function parseCsv(text) {
@@ -144,8 +149,11 @@
     var r = readInput();
     showErrors(r.errs);
     if (r.errs.length) { clearResults(); return; }
-    var out = Scheduler.run($('algo').value, r.procs, Number($('quantum').value));
-    renderGantt(out, r.procs);
+    var algo = $('algo').value, q = Number($('quantum').value);
+    var out = Scheduler.run(algo, r.procs, q);
+    // the label comes from the same values that were passed to the scheduler
+    var label = { FCFS: 'First-Come, First-Served', SJF: 'Shortest-Job-First', RR: 'Round Robin \u00b7 quantum ' + q }[algo];
+    renderGantt(out, r.procs, label);
     renderMetrics(out);
   };
   $('reset').onclick = function () {

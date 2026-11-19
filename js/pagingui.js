@@ -7,6 +7,7 @@
 
   var TABS = ['sched', 'paging'];
   function selectTab(name) {
+    document.querySelector('.tabs').dataset.active = name;
     TABS.forEach(function (t) {
       var on = t === name;
       $(t + '-view').hidden = !on;
@@ -52,87 +53,115 @@
     return e;
   }
 
-  function renderTrace(out, nFrames) {
-    var box = $('pg-trace'), table = el('table'), thead = el('thead'), tbody = el('tbody');
-    var hr = el('tr'), r, s;
-    box.className = 'trace'; box.innerHTML = '';
-    void box.offsetWidth; box.className = 'trace play'; // restart the reveal animation
+  var FULL = { FIFO: 'FIFO', LRU: 'LRU', OPT: 'Optimal' };
+  var ctx = null; // last input, used when a comparison row is picked
+
+  function chipText(algo, refs, n) {
+    return FULL[algo] + ' \u00b7 ' + n + ' frame' + (n > 1 ? 's' : '') + ' \u00b7 ' + refs.length + ' references';
+  }
+  function key(cls, text) {
+    var li = el('li', 'key'); li.appendChild(el('i', cls)); li.appendChild(document.createTextNode(text)); return li;
+  }
+
+  function renderTrace(algo, refs, n) {
+    var out = PageReplacement.run(algo, refs, n);
+    var box = $('pg-trace'), table = el('table'), thead = el('thead'), tbody = el('tbody'), hr = el('tr'), r, s;
+    $('pg-trace-chip').textContent = chipText(algo, refs, n); $('pg-trace-chip').hidden = false;
+    box.className = 'trace' + (refs.length > 30 ? ' dense' : ''); box.innerHTML = '';
+    void box.offsetWidth; box.classList.add('play');
     hr.appendChild(el('th', 'row', 'Reference'));
-    out.steps.forEach(function (st) { hr.appendChild(el('th', 'pg c' + (st.page % 10), st.page)); });
+    out.steps.forEach(function (st, i) { var th = el('th', 'pg c' + (st.page % 10), st.page); th.title = 'Step ' + (i + 1); hr.appendChild(th); });
     thead.appendChild(hr); table.appendChild(thead);
-    for (s = 0; s < nFrames; s++) {
+    for (s = 0; s < n; s++) {
       r = el('tr'); r.appendChild(el('th', 'row', 'Frame ' + (s + 1)));
       out.steps.forEach(function (st) {
-        var v = st.frames[s];
-        var td = el('td', v === null ? 'cell blank' : 'cell c' + (v % 10), v === null ? '' : v);
+        var v = st.frames[s], td = el('td', v === null ? 'cell blank' : 'cell c' + (v % 10), v === null ? '' : v);
         if (st.loadedIn === s) td.classList.add('new');
         r.appendChild(td);
       });
       tbody.appendChild(r);
     }
     r = el('tr'); r.appendChild(el('th', 'row', 'Result'));
-    out.steps.forEach(function (st) {
-      var td = el('td', 'res ' + (st.hit ? 'hit' : 'fault'), st.hit ? 'Hit' : 'Fault');
-      if (st.replaced !== null) td.title = 'Replaced page ' + st.replaced;
-      r.appendChild(td);
-    });
+    out.steps.forEach(function (st) { r.appendChild(el('td', 'res ' + (st.hit ? 'hit' : 'fault'), st.hit ? 'Hit' : 'Fault')); });
+    tbody.appendChild(r);
+    r = el('tr', 'ev'); r.appendChild(el('th', 'row', 'Evicted'));
+    out.steps.forEach(function (st) { r.appendChild(el('td', 'evc', st.replaced === null ? '\u2013' : st.replaced)); });
     tbody.appendChild(r);
     table.appendChild(tbody); box.appendChild(table);
+
+    var lg = $('pg-legend'), seen = [];
+    lg.innerHTML = ''; lg.hidden = false;
+    refs.forEach(function (p) { if (seen.indexOf(p) < 0) seen.push(p); });
+    seen.slice(0, 12).forEach(function (p) { lg.appendChild(el('li', 'sw c' + (p % 10), p)); });
+    lg.appendChild(key('k-new', 'Just loaded')); lg.appendChild(key('k-hit', 'Hit'));
+    lg.appendChild(key('k-fault', 'Fault')); lg.appendChild(key('k-ev', 'Page evicted'));
   }
 
   function pct(x) { return (x * 100).toFixed(1) + '%'; }
 
-  function stat(label, value) {
-    var d = el('div', 'stat'); d.appendChild(el('b', '', value)); d.appendChild(el('span', '', label));
+  function stat(cls, label, value, sub, ratio) {
+    var d = el('div', 'stat ' + cls);
+    d.appendChild(el('span', 'lab', label)); d.appendChild(el('b', '', value));
+    if (ratio === undefined) d.appendChild(el('small', '', sub));
+    else { var bar = el('div', 'bar'), f = el('i'); f.style.width = (ratio * 100) + '%'; bar.appendChild(f); d.appendChild(bar); }
     return d;
   }
 
-  function renderSummary(out, algo, refs, nFrames) {
-    var box = $('pg-summary'); box.className = ''; box.innerHTML = '';
-    var stats = el('div', 'pg-stats');
-    stats.appendChild(stat('Page faults', out.faults));
-    stats.appendChild(stat('Hits', out.hits));
-    stats.appendChild(stat('Fault ratio', pct(out.faultRatio)));
-    stats.appendChild(stat('Hit ratio', pct(out.hitRatio)));
-    box.appendChild(stats);
-    box.appendChild(el('p', 'note', NAMES[algo] + ' with ' + nFrames + ' frame' + (nFrames > 1 ? 's' : '') + ', ' + refs.length + ' references.'));
+  function renderSummary(out, algo, refs, n) {
+    var box = $('pg-summary'), grid = el('div', 'stats four'), of = 'of ' + refs.length + ' references';
+    box.className = ''; box.innerHTML = '';
+    box.appendChild(el('p', 'runline', chipText(algo, refs, n)));
+    grid.appendChild(stat('fault', 'Page faults', out.faults, of));
+    grid.appendChild(stat('hit', 'Hits', out.hits, of));
+    grid.appendChild(stat('fault', 'Fault ratio', pct(out.faultRatio), '', out.faultRatio));
+    grid.appendChild(stat('hit', 'Hit ratio', pct(out.hitRatio), '', out.hitRatio));
+    box.appendChild(grid);
   }
 
-  function renderCompare(refs, nFrames) {
-    var box = $('pg-summary'); box.className = ''; box.innerHTML = '';
-    var rows = ['FIFO', 'LRU', 'OPT'].map(function (a) { return { a: a, o: PageReplacement.run(a, refs, nFrames) }; });
+  function renderCompare(refs, n, selected) {
+    var box = $('pg-summary'), algos = ['FIFO', 'LRU', 'OPT'];
+    var rows = algos.map(function (a) { return { a: a, o: PageReplacement.run(a, refs, n) }; });
     var min = Math.min.apply(null, rows.map(function (x) { return x.o.faults; }));
-    var table = el('table', 'cmp'), head = el('thead'), hr = el('tr'), body = el('tbody');
+    var card = el('article', 'card'), wrap = el('div', 'scroll'), table = el('table', 'data cmp'), head = el('thead'), hr = el('tr'), body = el('tbody');
+    box.className = ''; box.innerHTML = '';
+    card.appendChild(el('h2', '', 'Comparison'));
     ['Algorithm', 'Faults', 'Hits', 'Fault ratio', 'Hit ratio'].forEach(function (h) { hr.appendChild(el('th', '', h)); });
     head.appendChild(hr); table.appendChild(head);
     rows.forEach(function (x) {
-      var tr = el('tr', x.o.faults === min ? 'best' : '');
-      [NAMES[x.a], x.o.faults, x.o.hits, pct(x.o.faultRatio), pct(x.o.hitRatio)].forEach(function (v) { tr.appendChild(el('td', '', v)); });
+      var tr = el('tr', (x.o.faults === min ? 'best ' : '') + (x.a === selected ? 'sel' : '')), first = el('td', '', FULL[x.a]);
+      if (x.o.faults === min) first.appendChild(el('span', 'badge', 'Fewest faults'));
+      tr.appendChild(first);
+      [x.o.faults, x.o.hits, pct(x.o.faultRatio), pct(x.o.hitRatio)].forEach(function (v) { tr.appendChild(el('td', '', v)); });
+      tr.tabIndex = 0; tr.title = 'Show the frame trace for ' + FULL[x.a];
+      var pick = function () { renderCompare(refs, n, x.a); renderTrace(x.a, refs, n); };
+      tr.onclick = pick; tr.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
       body.appendChild(tr);
     });
-    table.appendChild(body); box.appendChild(table);
-    box.appendChild(el('p', 'note', 'Comparison for ' + nFrames + ' frame' + (nFrames > 1 ? 's' : '') + ', ' + refs.length + ' references. Fewest faults highlighted.'));
+    table.appendChild(body); wrap.appendChild(table); card.appendChild(wrap);
+    card.appendChild(el('p', 'note', 'Select a row to show its frame trace below. ' + n + ' frame' + (n > 1 ? 's' : '') + ', ' + refs.length + ' references.'));
+    box.appendChild(card);
   }
 
   function clearResults() {
     $('pg-summary').className = 'empty'; $('pg-summary').textContent = 'Run a simulation to see the results.';
     $('pg-trace').className = 'trace empty'; $('pg-trace').textContent = 'Run a simulation to see each step.';
+    $('pg-trace-chip').hidden = true; $('pg-legend').hidden = true;
   }
 
   $('pg-run').onclick = function () {
     var r = readInput(); showErrors(r.errs);
     if (r.errs.length) { clearResults(); return; }
-    var algo = $('pg-algo').value, out = PageReplacement.run(algo, r.refs, r.frames);
-    renderSummary(out, algo, r.refs, r.frames);
-    renderTrace(out, r.frames);
+    var algo = $('pg-algo').value;
+    renderSummary(PageReplacement.run(algo, r.refs, r.frames), algo, r.refs, r.frames);
+    renderTrace(algo, r.refs, r.frames);
   };
 
   $('pg-compare').onclick = function () {
     var r = readInput(); showErrors(r.errs);
     if (r.errs.length) { clearResults(); return; }
     var algo = $('pg-algo').value;
-    renderCompare(r.refs, r.frames);
-    renderTrace(PageReplacement.run(algo, r.refs, r.frames), r.frames);
+    renderCompare(r.refs, r.frames, algo);
+    renderTrace(algo, r.refs, r.frames);
   };
 
   $('pg-reset').onclick = function () {

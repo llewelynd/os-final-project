@@ -7,26 +7,11 @@
 (function (root) {
   'use strict';
 
-  function normalizeRefs(refs) {
-    if (!Array.isArray(refs)) return [];
-    return refs.map(function (v) { return Number(v); }).filter(function (v) { return Number.isFinite(v); });
-  }
-
-  function validateFrames(nFrames) {
-    var frames = Number(nFrames);
-    if (!Number.isFinite(frames) || frames < 1 || Math.floor(frames) !== frames) {
-      throw new Error('Frames must be a whole number greater than 0.');
-    }
-    return frames;
-  }
-
   // Shared simulation loop; victim(ctx) returns the slot index to evict when all frames are full.
   function simulate(refs, nFrames, hooks) {
-    refs = normalizeRefs(refs);
-    var frames = validateFrames(nFrames);
     var slots = [], steps = [], faults = 0, i, s;
-    for (s = 0; s < frames; s++) slots.push(null);
-    var state = hooks.init(frames);
+    for (s = 0; s < nFrames; s++) slots.push(null);
+    var state = hooks.init(nFrames);
 
     for (i = 0; i < refs.length; i++) {
       var page = refs[i], at = slots.indexOf(page), hit = at !== -1, replaced = null, loaded = -1;
@@ -56,7 +41,7 @@
   function fifo(refs, nFrames) {
     return simulate(refs, nFrames, {
       init: function () { return { loadedAt: [] }; },
-      onHit: function () {},
+      onHit: function () { },
       onLoad: function (st, slot, t) { st.loadedAt[slot] = t; },
       victim: function (st, slots) {
         var best = 0;
@@ -85,8 +70,8 @@
   function optimal(refs, nFrames) {
     return simulate(refs, nFrames, {
       init: function () { return {}; },
-      onHit: function () {},
-      onLoad: function () {},
+      onHit: function () { },
+      onLoad: function () { },
       victim: function (st, slots, all, now) {
         var best = 0, bestDist = -1;
         for (var s = 0; s < slots.length; s++) {
@@ -100,10 +85,9 @@
   }
 
   function run(algo, refs, nFrames) {
-    var name = String(algo || '').trim().toUpperCase();
-    if (name === 'FIFO') return fifo(refs, nFrames);
-    if (name === 'LRU') return lru(refs, nFrames);
-    if (name === 'OPT' || name === 'OPTIMAL') return optimal(refs, nFrames);
+    if (algo === 'FIFO') return fifo(refs, nFrames);
+    if (algo === 'LRU') return lru(refs, nFrames);
+    if (algo === 'OPT') return optimal(refs, nFrames);
     throw new Error('Unknown page replacement algorithm: ' + algo);
   }
 
