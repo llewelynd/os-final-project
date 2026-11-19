@@ -27,7 +27,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.55 var(--body);
+  font: 14px/1.5 var(--body);
   font-variant-numeric: tabular-nums
 }
 
@@ -44,9 +44,9 @@ body {
 }
 
 .page {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 44px 32px 80px
+  padding: 32px 28px 64px
 }
 
 :focus-visible {
@@ -57,9 +57,9 @@ body {
 /* Header + tabs */
 .top {
   display: flex;
-  gap: 18px;
+  gap: 14px;
   align-items: center;
-  margin-bottom: 30px
+  margin-bottom: 22px
 }
 
 .mark {
@@ -67,10 +67,10 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
-  width: 46px;
-  height: 46px;
-  padding: 7px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  border-radius: 12px;
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow)
@@ -98,23 +98,24 @@ body {
 
 h1 {
   margin: 0;
-  font: 800 clamp(1.5rem, 3.4vw, 2.2rem)/1.15 var(--head);
+  font: 800 clamp(1.3rem, 2.6vw, 1.75rem)/1.15 var(--head);
   letter-spacing: -.025em
 }
 
 .lede {
-  margin: 5px 0 0;
+  margin: 3px 0 0;
   color: var(--muted);
-  max-width: 60ch
+  max-width: 70ch;
+  font-size: .9rem
 }
 
 .tabs {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  width: min(100%, 430px);
-  padding: 4px;
-  margin-bottom: 28px;
+  width: min(100%, 380px);
+  padding: 3px;
+  margin-bottom: 20px;
   background: #efede7;
   border-radius: 14px
 }
@@ -122,10 +123,10 @@ h1 {
 .tabs::before {
   content: "";
   position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
   background: var(--card);
   border-radius: 10px;
   box-shadow: 0 1px 3px rgba(43, 42, 46, .12);
@@ -140,8 +141,8 @@ h1 {
   position: relative;
   border: 0;
   background: none;
-  padding: 10px 12px;
-  font: 700 .92rem var(--head);
+  padding: 8px 12px;
+  font: 700 .86rem var(--head);
   color: var(--muted);
   cursor: pointer;
   border-radius: 10px;
@@ -170,14 +171,14 @@ h1 {
 /* Layout + cards */
 .split {
   display: grid;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  gap: 20px;
   align-items: start
 }
 
 .stack {
   display: grid;
-  gap: 24px;
+  gap: 20px;
   min-width: 0
 }
 
@@ -194,23 +195,23 @@ h1 {
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 26px;
+  border-radius: 18px;
+  padding: 22px;
   box-shadow: var(--shadow)
 }
 
 .card.hero {
-  padding: 28px 28px 22px
+  padding: 22px
 }
 
 h2 {
-  margin: 0 0 16px;
-  font: 700 1.12rem var(--head);
+  margin: 0 0 14px;
+  font: 700 1rem var(--head);
   letter-spacing: -.01em
 }
 
 h3 {
-  margin: 24px 0 8px;
+  margin: 20px 0 6px;
   font: 700 .8rem var(--head);
   color: var(--muted);
   letter-spacing: .02em
@@ -222,7 +223,7 @@ h3 {
   gap: 8px 14px;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px
+  margin-bottom: 14px
 }
 
 .head h2 {
@@ -261,8 +262,8 @@ td.empty {
 /* Controls */
 .row2 {
   display: grid;
-  grid-template-columns: 1fr 110px;
-  gap: 12px
+  grid-template-columns: 1fr;
+  gap: 8px
 }
 
 .pg-form {
@@ -301,7 +302,7 @@ select,
 input[type=text],
 input[type=number] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 9px 12px;
   font: inherit;
   color: var(--ink);
   background: #fff;
@@ -355,14 +356,14 @@ input.bad {
 }
 
 .actions.main {
-  margin-top: 22px;
+  margin-top: 18px;
   align-items: center
 }
 
 .btn {
   font: 600 .92rem var(--body);
-  padding: 11px 22px;
-  border-radius: 11px;
+  padding: 9px 18px;
+  border-radius: 10px;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background var(--ease), border-color var(--ease), color var(--ease), transform .1s
@@ -380,7 +381,7 @@ input.bad {
 .btn.primary {
   background: var(--wine);
   color: #fff;
-  padding: 11px 34px;
+  padding: 9px 30px;
   box-shadow: 0 4px 12px -6px rgba(123, 45, 59, .7)
 }
 
@@ -429,7 +430,7 @@ th {
 }
 
 td {
-  padding: 10px;
+  padding: 8px 10px;
   text-align: right;
   border-bottom: 1px solid var(--line)
 }
@@ -640,11 +641,11 @@ td:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  height: 80px;
-  border-radius: 14px;
+  min-width: 36px;
+  height: 62px;
+  border-radius: 12px;
   color: var(--ink);
-  font: 700 1.05rem var(--head);
+  font: 700 .95rem var(--head);
   box-shadow: inset 0 -3px 0 rgba(43, 42, 46, .07);
   transition: transform .15s, box-shadow .15s
 }
@@ -693,8 +694,8 @@ td:first-child {
 /* Stat cards */
 .stats {
   display: grid;
-  gap: 14px;
-  margin-top: 20px
+  gap: 12px;
+  margin-top: 16px
 }
 
 .stats.four {
@@ -713,8 +714,8 @@ td:first-child {
 }
 
 .stat {
-  padding: 18px 20px;
-  border-radius: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
@@ -757,8 +758,8 @@ td:first-child {
 
 .stat b {
   display: block;
-  margin: 6px 0 4px;
-  font: 800 2.3rem/1.1 var(--head);
+  margin: 4px 0 2px;
+  font: 800 1.8rem/1.1 var(--head);
   letter-spacing: -.03em
 }
 
@@ -768,8 +769,8 @@ td:first-child {
 }
 
 .bar {
-  height: 6px;
-  margin-top: 14px;
+  height: 5px;
+  margin-top: 10px;
   border-radius: 9px;
   background: #efede7;
   overflow: hidden
@@ -832,15 +833,15 @@ td:first-child {
 
 .trace th.pg,
 .trace td.cell {
-  min-width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 11px;
   color: var(--ink);
-  font: 700 1.05rem var(--head)
+  font: 700 .98rem var(--head)
 }
 
 .trace th.pg {
-  height: 34px;
+  height: 30px;
   font-size: .88rem;
   border-radius: 10px
 }
