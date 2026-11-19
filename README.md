@@ -112,10 +112,6 @@ cpuschedsim/
 - JavaScript (no frameworks or build tools)
 ## Task Delegation
  
-- **Angel:** UI design, input table, Gantt chart rendering, and input validation
-- **Dramayo:** Core algorithm logic (FCFS, SJF, RR), ready queue management, and TAT/WT calculations
-- **Both:** Testing the simulator together
-## Formulas
- 
-- Turnaround Time (TAT) = Completion Time − Arrival Time
-- Waiting Time (WT) = Turnaround Time − Burst Time
+- **Angel:** 
+- **Dramayo:**
+- **Both:**
