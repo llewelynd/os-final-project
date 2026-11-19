@@ -101,3 +101,4 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Scheduler = api;
 })(typeof window !== 'undefined' ? window : this);
+
