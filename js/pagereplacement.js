@@ -41,7 +41,7 @@
   function fifo(refs, nFrames) {
     return simulate(refs, nFrames, {
       init: function () { return { loadedAt: [] }; },
-      onHit: function () { },
+      onHit: function () {},
       onLoad: function (st, slot, t) { st.loadedAt[slot] = t; },
       victim: function (st, slots) {
         var best = 0;
@@ -70,8 +70,8 @@
   function optimal(refs, nFrames) {
     return simulate(refs, nFrames, {
       init: function () { return {}; },
-      onHit: function () { },
-      onLoad: function () { },
+      onHit: function () {},
+      onLoad: function () {},
       victim: function (st, slots, all, now) {
         var best = 0, bestDist = -1;
         for (var s = 0; s < slots.length; s++) {
