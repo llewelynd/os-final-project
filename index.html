@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CPU Scheduling &amp; Page Replacement Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <h1>CPU scheduling<br>&amp; page replacement</h1>
+      <p class="lede">Choose an algorithm, edit the inputs, and run it. Every block in the schedule and every tile in the frame trace is one step you can check by hand.</p>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Simulator">
+      <button id="tab-sched" class="tab" role="tab" aria-selected="true" aria-controls="sched-view">CPU scheduling</button>
+      <button id="tab-paging" class="tab" role="tab" aria-selected="false" aria-controls="paging-view" tabindex="-1">Page replacement</button>
+    </nav>
+
+    <section id="sched-view" class="bench" role="tabpanel" aria-labelledby="tab-sched">
+      <div class="bench-grid">
+        <div class="controls">
+          <h3>Settings</h3>
+          <div class="field">
+            <label for="algo">Algorithm</label>
+            <select id="algo">
+              <option value="FCFS">First-Come, First-Served (FCFS)</option>
+              <option value="SJF">Shortest-Job-First (SJF)</option>
+              <option value="RR">Round Robin (RR)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="quantum">Time quantum</label>
+            <input id="quantum" type="number" min="1" step="1" placeholder="Round Robin only" disabled>
+          </div>
+
+          <h3>Processes</h3>
+          <table id="input-table" class="entry">
+            <thead><tr><th>ID</th><th>Arrival</th><th>Burst</th><th><span class="sr">Remove</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="actions">
+            <button id="add" class="btn ghost">Add process</button>
+            <button id="delete" class="btn ghost">Remove last</button>
+            <button id="upload" class="btn ghost">Upload CSV</button>
+            <input id="csv" type="file" accept=".csv,text/csv" hidden>
+          </div>
+          <div id="msg" class="msg" role="alert" aria-live="polite"></div>
+          <div class="actions main">
+            <button id="run" class="btn primary">Run</button>
+            <button id="reset" class="btn quiet">Reset</button>
+          </div>
+        </div>
+
+        <div class="output">
+          <h3>Schedule</h3>
+          <div id="gantt" class="gantt empty">Run a simulation to see the schedule.</div>
+          <p class="note">Each color is a process. Hatched blocks are idle time. Numbers underneath are clock times.</p>
+
+          <h3>Metrics</h3>
+          <table id="metrics" class="data">
+            <thead><tr><th>Process</th><th>Arrival</th><th>Burst</th><th>Completion</th><th>Turnaround</th><th>Waiting</th></tr></thead>
+            <tbody><tr><td colspan="6" class="empty">No results yet.</td></tr></tbody>
+          </table>
+          <div id="averages" class="averages" hidden></div>
+          <p class="note">Turnaround = completion &minus; arrival. Waiting = turnaround &minus; burst.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="paging-view" class="bench" role="tabpanel" aria-labelledby="tab-paging" hidden>
+      <div class="bench-grid">
+        <div class="controls">
+          <h3>Settings</h3>
+          <div class="field">
+            <label for="pg-algo">Algorithm</label>
+            <select id="pg-algo">
+              <option value="FIFO">First-In, First-Out (FIFO)</option>
+              <option value="LRU">Least Recently Used (LRU)</option>
+              <option value="OPT">Optimal (OPT)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pg-frames">Frames</label>
+            <input id="pg-frames" type="number" min="1" max="10" step="1" value="3">
+          </div>
+          <div class="field">
+            <label for="pg-refs">Reference string</label>
+            <input id="pg-refs" type="text" value="7 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 7 0 1" placeholder="e.g. 7 0 1 2 0 3 (spaces or commas)">
+          </div>
+          <div id="pg-msg" class="msg" role="alert" aria-live="polite"></div>
+          <div class="actions main">
+            <button id="pg-run" class="btn primary">Run</button>
+            <button id="pg-compare" class="btn ghost">Compare all three</button>
+            <button id="pg-reset" class="btn quiet">Reset</button>
+          </div>
+        </div>
+
+        <div class="output">
+          <h3>Result</h3>
+          <div id="pg-summary" class="empty">Run a simulation to see the results.</div>
+          <p class="note">Hit ratio = hits &divide; references. Fault ratio = page faults &divide; references.</p>
+
+          <h3>Frame trace</h3>
+          <div id="pg-trace" class="trace empty">Run a simulation to see each step.</div>
+          <p class="note">Each page keeps its color, so you can follow it from frame to frame. A dark outline marks the page just loaded. Filled results are faults.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/algorithms.js"></script>
+  <script src="js/pagereplacement.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pagingui.js"></script>
+</body>
+</html>
